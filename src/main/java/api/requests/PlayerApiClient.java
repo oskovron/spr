@@ -3,7 +3,8 @@ package api.requests;
 import api.client.Configuration;
 import api.client.ResponseWrapper;
 import api.client.RestClient;
-import api.model.Player;
+import api.model.request.Player;
+import api.model.response.PlayerResponse;
 import common.PropertiesReader;
 
 import java.util.HashMap;
@@ -17,7 +18,7 @@ public class PlayerApiClient extends RestClient {
         return new Configuration(PropertiesReader.getProperty("base.url"), "application/json");
     }
 
-    public ResponseWrapper<Player> createPlayer(String editor, Player player) {
+    public ResponseWrapper<PlayerResponse> createPlayer(String editor, Player player) {
 //        logger.info("Creating player with editor: {}, player: {}", editor, player);
         Map<String, Object> queryParams = new HashMap<>();
         queryParams.put("age", player.getAge());
@@ -26,8 +27,13 @@ public class PlayerApiClient extends RestClient {
         queryParams.put("password", player.getPassword());
         queryParams.put("role", player.getRole());
         queryParams.put("screenName", player.getScreenName());
-        return get(format("/player/create/{%s}", editor), editor, queryParams, Player.class);
+        return get(format("/player/create/{%s}", editor), editor, queryParams, PlayerResponse.class);
     }
 
-
+    public ResponseWrapper<PlayerResponse> getPlayer(int playerId) {
+//        logger.info("Getting player with ID: {}", playerRequest.getPlayerId());
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("playerId", playerId);
+        return post("/player/get", requestBody, PlayerResponse.class);
+    }
 }

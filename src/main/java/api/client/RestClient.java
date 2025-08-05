@@ -62,4 +62,10 @@ public abstract class RestClient {
                 .get(path);
         return new ResponseWrapper<>(response, responseClass);
     }
+
+    public <T, F> ResponseWrapper<F> post(String path, T payload, Class<F> responseClass) {
+        Response response = given()
+                .spec(requestSpecification).body(payload).post(path);
+        return new ResponseWrapper<>(response, responseClass);
+    }
 }

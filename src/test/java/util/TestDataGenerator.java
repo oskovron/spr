@@ -1,7 +1,6 @@
 package util;
 
-import api.model.Player;
-import common.PropertiesReader;
+import api.model.request.Player;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

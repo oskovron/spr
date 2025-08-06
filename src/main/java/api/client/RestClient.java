@@ -52,10 +52,10 @@ public abstract class RestClient {
         return new ResponseWrapper<>(response, responseClass);
     }
 
-    public <F> ResponseWrapper<F> get(String path, String editor, Map<String, Object> queryParams, Class<F> responseClass) {
+    public <F> ResponseWrapper<F> get(String path, String pathParam, Map<String, Object> queryParams, Class<F> responseClass) {
         Response response = given()
                 .spec(requestSpecification)
-                .pathParam(editor, editor)
+                .pathParam(pathParam, pathParam)
                 .queryParams(queryParams)
                 .get(path);
         return new ResponseWrapper<>(response, responseClass);
@@ -65,5 +65,23 @@ public abstract class RestClient {
         Response response = given()
                 .spec(requestSpecification).body(payload).post(path);
         return new ResponseWrapper<>(response, responseClass);
+    }
+
+    public <T, F> ResponseWrapper<F> patch(String path, Map<String, Object> pathParams, T payload, Class<F> responseClass) {
+        Response response = given()
+                .spec(requestSpecification)
+                .pathParams(pathParams)
+                .body(payload)
+                .patch(path);
+        return new ResponseWrapper<>(response, responseClass);
+    }
+
+    public <T> Response delete(String path, Map<String, Object> pathParam, T payload) {
+        return given()
+                .spec(requestSpecification)
+                .pathParams(pathParam)
+                .body(payload)
+                .delete(path);
+
     }
 }

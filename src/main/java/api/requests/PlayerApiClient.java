@@ -5,7 +5,9 @@ import api.client.ResponseWrapper;
 import api.client.RestClient;
 import api.model.request.Player;
 import api.model.response.PlayerResponse;
+import api.model.response.PlayersResponse;
 import common.PropertiesReader;
+import io.restassured.response.Response;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,10 +32,36 @@ public class PlayerApiClient extends RestClient {
         return get(format("/player/create/{%s}", editor), editor, queryParams, PlayerResponse.class);
     }
 
-    public ResponseWrapper<PlayerResponse> getPlayer(int playerId) {
+    public ResponseWrapper<PlayerResponse> getPlayer(Integer playerId) {
         logger.info("Getting player with ID: {}", playerId);
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("playerId", playerId);
         return post("/player/get", requestBody, PlayerResponse.class);
     }
+
+    public ResponseWrapper<PlayersResponse> getAllPlayers() {
+        logger.info("Getting all players");
+        return get("/player/get/all", PlayersResponse.class);
+    }
+
+    public ResponseWrapper<PlayerResponse> updatePlayer(String editor, Integer playerId, Player updatePlayer) {
+        logger.info("Updating player with editor: {}, playerId: {}, player: {}", editor, playerId, updatePlayer);
+
+        Map<String, Object> pathParams = new HashMap<>();
+        pathParams.put("editor", editor);
+        pathParams.put("id", playerId);
+
+        return patch("/player/update/{editor}/{id}", pathParams, updatePlayer, PlayerResponse.class);
+    }
+
+    public Response deletePlayer(String editor, Integer playerId) {
+        logger.info("Deleting player with editor: {}, playerId: {}", editor, playerId);
+        Map<String, Object> pathParams = new HashMap<>();
+        pathParams.put("editor", editor);
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("playerId", playerId);
+
+        return delete("/player/delete/{editor}", pathParams, requestBody);
+    }
+
 }

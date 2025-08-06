@@ -19,7 +19,7 @@ public class PlayerApiClient extends RestClient {
     }
 
     public ResponseWrapper<PlayerResponse> createPlayer(String editor, Player player) {
-//        logger.info("Creating player with editor: {}, player: {}", editor, player);
+        logger.info("Creating player with editor: {}, player: {}", editor, player);
         Map<String, Object> queryParams = new HashMap<>();
         queryParams.put("age", player.getAge());
         queryParams.put("gender", player.getGender());
@@ -31,7 +31,7 @@ public class PlayerApiClient extends RestClient {
     }
 
     public ResponseWrapper<PlayerResponse> getPlayer(int playerId) {
-//        logger.info("Getting player with ID: {}", playerRequest.getPlayerId());
+        logger.info("Getting player with ID: {}", playerId);
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("playerId", playerId);
         return post("/player/get", requestBody, PlayerResponse.class);

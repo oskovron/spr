@@ -5,19 +5,17 @@ import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.config.LogConfig;
 import io.restassured.config.RestAssuredConfig;
-import io.restassured.filter.log.ErrorLoggingFilter;
-import io.restassured.filter.log.ResponseLoggingFilter;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
-import java.util.logging.LogManager;
 
 import static io.restassured.RestAssured.given;
 
 public abstract class RestClient {
+    protected static final Logger logger = LoggerFactory.getLogger(PlayerApiClient.class);
     protected Configuration configuration;
     private RequestSpecification requestSpecification;
     private RestAssuredConfig restAssuredConfig = RestAssured.config()

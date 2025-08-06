@@ -41,7 +41,7 @@ public abstract class RestClient {
                 .setConfig(restAssuredConfig)
                 .setBaseUri(configuration.getServicePath())
                 .setContentType(configuration.getContentType())
-//                .log(io.restassured.filter.log.LogDetail.ALL)
+                .log(io.restassured.filter.log.LogDetail.ALL)
 //                .addHeaders(configuration.getHeaders())
                 .build();
     }
@@ -59,12 +59,14 @@ public abstract class RestClient {
                 .pathParam(pathParam, pathParam)
                 .queryParams(queryParams)
                 .get(path);
+        response.then().log().all();
         return new ResponseWrapper<>(response, responseClass);
     }
 
     public <T, F> ResponseWrapper<F> post(String path, T payload, Class<F> responseClass) {
         Response response = given()
                 .spec(requestSpecification).body(payload).post(path);
+        response.then().log().all();
         return new ResponseWrapper<>(response, responseClass);
     }
 
@@ -78,11 +80,12 @@ public abstract class RestClient {
     }
 
     public <T> Response delete(String path, Map<String, Object> pathParam, T payload) {
-        return given()
+        Response response = given()
                 .spec(requestSpecification)
                 .pathParams(pathParam)
                 .body(payload)
                 .delete(path);
-
+        response.then().log().all();
+        return response;
     }
 }

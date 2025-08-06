@@ -7,6 +7,8 @@ import api.model.request.Player;
 import api.model.response.PlayerResponse;
 import api.model.response.PlayersResponse;
 import api.requests.PlayerApiClient;
+import io.restassured.RestAssured;
+import io.restassured.parsing.Parser;
 import io.restassured.response.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,17 +21,24 @@ import util.TestDataGenerator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import static common.Properties.DEFAULT_ADMIN_LOGIN;
+import static common.Properties.DEFAULT_SUPERVISOR_LOGIN;
 import static common.PropertiesReader.getProperty;
 import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspath;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.fail;
 
 public class PlayerControllerTest {
 
+        static {
+        RestAssured.defaultParser = Parser.JSON;
+    }
     private static final Logger logger = LoggerFactory.getLogger(PlayerControllerTest.class);
     private PlayerApiClient apiClient;
     private List<Integer> createdPlayerIds;
 
+    //todo allure!
     @BeforeMethod
     public void setUp() {
         logger.info("Setting up PlayerControllerTest");
@@ -40,10 +49,9 @@ public class PlayerControllerTest {
     @AfterMethod
     public void tearDown() {
         logger.info("Cleaning up created players");
-        // Clean up created players to avoid test data pollution
         for (Integer playerId : createdPlayerIds) {
             try {
-//                apiClient.deletePlayer(config.getSupervisorLogin(), playerId); //todo delete!
+                apiClient.deletePlayer(getProperty(DEFAULT_SUPERVISOR_LOGIN), playerId);
                 logger.info("Cleaned up player with ID: {}", playerId);
             } catch (Exception e) {
                 logger.warn("Failed to clean up player with ID: {}", playerId, e);
@@ -56,13 +64,11 @@ public class PlayerControllerTest {
         SoftAssert softAssert = new SoftAssert();
         Player expectedPlayer = TestDataGenerator.generateValidPlayer();
         ResponseWrapper<PlayerResponse> actualPlayer = apiClient
-                .createPlayer(getProperty("default.supervisor.login"), expectedPlayer);
-        PlayerResponse actualPlayerResponseBody = actualPlayer.readEntity();
+                .createPlayer(getProperty(DEFAULT_SUPERVISOR_LOGIN), expectedPlayer);
         actualPlayer.expectingStatusCode(200);
-        //todo assert not list in rsponse , but object ?
+        PlayerResponse actualPlayerResponseBody = actualPlayer.readEntity();
 
         assertNotNull(actualPlayerResponseBody.toString(), "Response body should not be null");
-
         softAssert.assertEquals(actualPlayerResponseBody.getAge(), expectedPlayer.getAge(),
                 "Age should be equal, but is not.");
         softAssert.assertEquals(actualPlayerResponseBody.getGender(), expectedPlayer.getGender(),
@@ -89,10 +95,9 @@ public class PlayerControllerTest {
         Player expectedPlayer = TestDataGenerator.generateValidPlayer();
 
         ResponseWrapper<PlayerResponse> actualPlayer = apiClient
-                .createPlayer(getProperty("default.supervisor.login"), expectedPlayer);
-        PlayerResponse actualPlayerResponseBody = actualPlayer.readEntity();
-
+                .createPlayer(getProperty(DEFAULT_SUPERVISOR_LOGIN), expectedPlayer);
         actualPlayer.expectingStatusCode(200);
+        PlayerResponse actualPlayerResponseBody = actualPlayer.readEntity();
         assertNotNull(actualPlayerResponseBody.toString(), "Response body should not be null");
 
         ResponseWrapper<PlayerResponse> getPlayerResponse = apiClient.getPlayer(actualPlayerResponseBody.getPlayerId());
@@ -125,10 +130,9 @@ public class PlayerControllerTest {
         Player expectedPlayer = TestDataGenerator.generateValidPlayer();
 
         ResponseWrapper<PlayerResponse> actualPlayer = apiClient
-                .createPlayer(getProperty("default.admin.login"), expectedPlayer);
-        PlayerResponse actualPlayerResponseBody = actualPlayer.readEntity();
-
+                .createPlayer(getProperty(DEFAULT_ADMIN_LOGIN), expectedPlayer);
         actualPlayer.expectingStatusCode(200);
+        PlayerResponse actualPlayerResponseBody = actualPlayer.readEntity();
         assertNotNull(actualPlayerResponseBody.toString(), "Response body should not be null");
 
         ResponseWrapper<PlayerResponse> getPlayerResponse = apiClient.getPlayer(actualPlayerResponseBody.getPlayerId());
@@ -159,18 +163,18 @@ public class PlayerControllerTest {
     public void testCreatePlayerWithAdminRole() {
         Player player = TestDataGenerator.generateValidPlayer("admin");
         ResponseWrapper<PlayerResponse> actualPlayer = apiClient
-                .createPlayer(getProperty("default.supervisor.login"), player);
-        createdPlayerIds.add(actualPlayer.readEntity().getPlayerId());
+                .createPlayer(getProperty(DEFAULT_SUPERVISOR_LOGIN), player);
         actualPlayer.expectingStatusCode(200);
+        createdPlayerIds.add(actualPlayer.readEntity().getPlayerId());
     }
 
     @Test(description = "Create player with user role")
     public void testCreatePlayerWithUserRole() {
         Player player = TestDataGenerator.generateValidPlayer("user");
         ResponseWrapper<PlayerResponse> actualPlayer = apiClient
-                .createPlayer(getProperty("default.supervisor.login"), player);
-        createdPlayerIds.add(actualPlayer.readEntity().getPlayerId());
+                .createPlayer(getProperty(DEFAULT_SUPERVISOR_LOGIN), player);
         actualPlayer.expectingStatusCode(200);
+        createdPlayerIds.add(actualPlayer.readEntity().getPlayerId());
     }
 
     /**
@@ -180,7 +184,7 @@ public class PlayerControllerTest {
     public void testCreatePlayerWithInvalidAgeYoung() {
         Player player = TestDataGenerator.generatePlayerWithInvalidAgeYoung();
         Response response = apiClient
-                .createPlayer(getProperty("default.supervisor.login"), player)
+                .createPlayer(getProperty(DEFAULT_SUPERVISOR_LOGIN), player)
                 .getResponse();
         assertEquals(response.getStatusCode(), 400, "Expected error for invalid age");
         assertEquals(response
@@ -191,7 +195,7 @@ public class PlayerControllerTest {
     public void testCreatePlayerWithInvalidAgeOld() {
         Player player = TestDataGenerator.generatePlayerWithInvalidAgeOld();
         Response response = apiClient
-                .createPlayer(getProperty("default.supervisor.login"), player)
+                .createPlayer(getProperty(DEFAULT_SUPERVISOR_LOGIN), player)
                 .getResponse();
         assertEquals(response.getStatusCode(), 400, "Expected error for invalid age");
         assertEquals(response
@@ -205,7 +209,7 @@ public class PlayerControllerTest {
     public void testCreatePlayerWithInvalidGender() {
         Player player = TestDataGenerator.generatePlayerWithInvalidGender();
         Response response = apiClient
-                .createPlayer(getProperty("default.supervisor.login"), player)
+                .createPlayer(getProperty(DEFAULT_SUPERVISOR_LOGIN), player)
                 .getResponse();
         assertEquals(response.getStatusCode(), 400, "Expected error for invalid gender");
         assertEquals(response
@@ -220,19 +224,25 @@ public class PlayerControllerTest {
     public void testCreatePlayerWithInvalidPasswordShort() {
         Player player = TestDataGenerator.generatePlayerWithInvalidPasswordShort();
         Response response = apiClient
-                .createPlayer(getProperty("default.supervisor.login"), player)
+                .createPlayer(getProperty(DEFAULT_SUPERVISOR_LOGIN), player)
                 .getResponse();
         assertEquals(response.getStatusCode(), 400, "Expected error for invalid password");
-        assertEquals(response
-                        .as(ErrorBody.class).getTitle(), "Password must contain latin letters and numbers (min 7 max 15 characters).",
-                "Expected error message");
+
+        try {
+            String title = response.as(ErrorBody.class).getTitle();
+            assertEquals(title, "Password must contain latin letters and numbers (min 7 max 15 characters).",
+                    "Expected error message");
+        } catch (RuntimeException e) {
+            logger.error("Could not parse ErrorBody from response", response.asString());
+            fail("Response body was not JSON or empty", e);
+        }
     }
 
     @Test(description = "Create player with invalid password (too long)")
     public void testCreatePlayerWithInvalidPasswordLong() {
         Player player = TestDataGenerator.generatePlayerWithInvalidPasswordLong();
         Response response = apiClient
-                .createPlayer(getProperty("default.supervisor.login"), player)
+                .createPlayer(getProperty(DEFAULT_SUPERVISOR_LOGIN), player)
                 .getResponse();
         assertEquals(response.getStatusCode(), 400, "Expected error for invalid password");
         assertEquals(response
@@ -244,7 +254,7 @@ public class PlayerControllerTest {
     public void testCreatePlayerWithInvalidPasswordNoNumbers() {
         Player player = TestDataGenerator.generatePlayerWithInvalidPasswordNoNumbers();
         Response response = apiClient
-                .createPlayer(getProperty("default.supervisor.login"), player)
+                .createPlayer(getProperty(DEFAULT_SUPERVISOR_LOGIN), player)
                 .getResponse();
         assertEquals(response.getStatusCode(), 400, "Expected error for invalid password");
         assertEquals(response
@@ -256,7 +266,7 @@ public class PlayerControllerTest {
     public void testCreatePlayerWithInvalidPasswordNoLetters() {
         Player player = TestDataGenerator.generatePlayerWithInvalidPasswordNoLetters();
         Response response = apiClient
-                .createPlayer(getProperty("default.supervisor.login"), player)
+                .createPlayer(getProperty(DEFAULT_SUPERVISOR_LOGIN), player)
                 .getResponse();
         assertEquals(response.getStatusCode(), 400, "Expected error for invalid password");
         assertEquals(response
@@ -268,7 +278,7 @@ public class PlayerControllerTest {
     public void testCreatePlayerWithInvalidRole() {
         Player player = TestDataGenerator.generatePlayerWithInvalidRole();
         Response response = apiClient
-                .createPlayer(getProperty("default.supervisor.login"), player)
+                .createPlayer(getProperty(DEFAULT_SUPERVISOR_LOGIN), player)
                 .getResponse();
         assertEquals(response.getStatusCode(), 400, "Expected error for invalid role");
         assertEquals(response
@@ -280,7 +290,7 @@ public class PlayerControllerTest {
     public void testCreatePlayerWithNullFields() {
         Player player = TestDataGenerator.generatePlayerWithNullFields();
         Response response = apiClient
-                .createPlayer(getProperty("default.supervisor.login"), player)
+                .createPlayer(getProperty(DEFAULT_SUPERVISOR_LOGIN), player)
                 .getResponse();
         assertEquals(response.getStatusCode(), 400, "Expected error for null required fields");
         assertEquals(response
@@ -307,9 +317,15 @@ public class PlayerControllerTest {
                 .createPlayer("user", player)
                 .getResponse();
         assertEquals(response.getStatusCode(), 403, "Expected error for non SuperAdmin or admin editor");
-        assertEquals(response
-                        .as(ErrorBody.class).getTitle(), "Only those with role ‘supervisor’ or ‘admin’ can create users.",
-                "Expected error message");
+
+        try {
+            String title = response.as(ErrorBody.class).getTitle();
+            assertEquals(title, "Only those with role ‘supervisor’ or ‘admin’ can create users.",
+                    "Expected error message");
+        } catch (RuntimeException e) {
+            logger.error("Could not parse ErrorBody from response", response.asString());
+            fail("Response body was not JSON or empty", e);
+        }
     }
 
     @Test(description = "Get player by valid ID using POST method")
@@ -317,7 +333,7 @@ public class PlayerControllerTest {
         // First create a player
         Player player = TestDataGenerator.generateValidPlayer();
         ResponseWrapper<PlayerResponse> actualPlayer = apiClient
-                .createPlayer(getProperty("default.supervisor.login"), player);
+                .createPlayer(getProperty(DEFAULT_SUPERVISOR_LOGIN), player);
         actualPlayer.expectingStatusCode(200);
 
         // Extract player ID from response
@@ -348,9 +364,16 @@ public class PlayerControllerTest {
     public void testGetPlayerByNonExistentId() {
         ResponseWrapper<PlayerResponse> getPlayerResponse = apiClient.getPlayer(999999);
         getPlayerResponse.expectingStatusCode(200);
-        String responseMessage = getPlayerResponse.getResponse().as(NoSuchUserBody.class)
-                .getTitle();
-        assertEquals(responseMessage, "User does not exist.");
+
+        try {
+            String title = getPlayerResponse.getResponse().as(NoSuchUserBody.class)
+                    .getTitle();
+            assertEquals(title, "User does not exist.", "Expected error message");
+        } catch (RuntimeException e) {
+            logger.error("Could not parse NoSuchUserBody from response", getPlayerResponse.toString());
+            fail("Response body was not JSON or empty", e);
+        }
+
     }
 
     @Test(description = "Get player with null playerId")
@@ -365,7 +388,7 @@ public class PlayerControllerTest {
         Player player = TestDataGenerator.generateValidPlayer();
 
         ResponseWrapper<PlayerResponse> actualPlayer = apiClient
-                .createPlayer(getProperty("default.supervisor.login"), player);
+                .createPlayer(getProperty(DEFAULT_SUPERVISOR_LOGIN), player);
         actualPlayer.expectingStatusCode(200);
         Integer playerId = actualPlayer.readEntity().getPlayerId();
         assertNotNull(playerId, "PlayerId should be not null");
@@ -378,7 +401,7 @@ public class PlayerControllerTest {
         updateData.setAge(30);
 
         ResponseWrapper<PlayerResponse> updatedPlayerResponse =
-                apiClient.updatePlayer(getProperty("default.supervisor.login"), playerId, updateData);
+                apiClient.updatePlayer(getProperty(DEFAULT_SUPERVISOR_LOGIN), playerId, updateData);
         updatedPlayerResponse.expectingStatusCode(200);
 
         ResponseWrapper<PlayerResponse> getPlayerAfterUpdateResponse = apiClient.getPlayer(playerId);
@@ -407,7 +430,7 @@ public class PlayerControllerTest {
         Player player = TestDataGenerator.generateValidPlayer();
 
         ResponseWrapper<PlayerResponse> actualPlayer = apiClient
-                .createPlayer(getProperty("default.supervisor.login"), player);
+                .createPlayer(getProperty(DEFAULT_SUPERVISOR_LOGIN), player);
         actualPlayer.expectingStatusCode(200);
         Integer playerId = actualPlayer.readEntity().getPlayerId();
         assertNotNull(playerId, "PlayerId should be not null");
@@ -420,7 +443,7 @@ public class PlayerControllerTest {
         updateData.setGender("female");
 
         ResponseWrapper<PlayerResponse> updatedPlayerResponse =
-                apiClient.updatePlayer(getProperty("default.supervisor.login"), playerId, updateData);
+                apiClient.updatePlayer(getProperty(DEFAULT_SUPERVISOR_LOGIN), playerId, updateData);
         updatedPlayerResponse.expectingStatusCode(200);
 
         ResponseWrapper<PlayerResponse> getPlayerAfterUpdateResponse = apiClient.getPlayer(playerId);
@@ -447,7 +470,7 @@ public class PlayerControllerTest {
     public void testUpdatePlayerWithInvalidAge() {
         Player player = TestDataGenerator.generateValidPlayer();
         ResponseWrapper<PlayerResponse> actualPlayer = apiClient
-                .createPlayer(getProperty("default.supervisor.login"), player);
+                .createPlayer(getProperty(DEFAULT_SUPERVISOR_LOGIN), player);
         actualPlayer.expectingStatusCode(200);
         Integer playerId = actualPlayer.readEntity().getPlayerId();
         assertNotNull(playerId, "PlayerId should be not null");
@@ -457,7 +480,7 @@ public class PlayerControllerTest {
         Player updateData = new Player();
         updateData.setAge(15);
 
-        ResponseWrapper<PlayerResponse> updatedPlayerResponse = apiClient.updatePlayer(getProperty("default.supervisor.login"), playerId, updateData);
+        ResponseWrapper<PlayerResponse> updatedPlayerResponse = apiClient.updatePlayer(getProperty(DEFAULT_SUPERVISOR_LOGIN), playerId, updateData);
         updatedPlayerResponse.expectingStatusCode(403);
         ErrorBody errorBody = updatedPlayerResponse.getResponse().as(ErrorBody.class);
         assertEquals(errorBody.getTitle(), "User should be older than 16 and younger than 60 years old.");
@@ -469,10 +492,16 @@ public class PlayerControllerTest {
         updateData.setAge(25);
 
         ResponseWrapper<PlayerResponse> updatePlayerResponse =
-                apiClient.updatePlayer(getProperty("default.supervisor.login"), 999999, updateData);
-        String responseMessage = updatePlayerResponse.getResponse().as(NoSuchUserBody.class)
-                .getTitle();
-        assertEquals(responseMessage, "User does not exist.");
+                apiClient.updatePlayer(getProperty(DEFAULT_SUPERVISOR_LOGIN), 999999, updateData);
+
+        try {
+            String title = updatePlayerResponse.getResponse().as(NoSuchUserBody.class).getTitle();
+            assertEquals(title, "User does not exist.",
+                    "Expected error message");
+        } catch (RuntimeException e) {
+            logger.error("Could not parse NoSuchUserBody from response", updatePlayerResponse.toString());
+            fail("Response body was not JSON or empty", e);
+        }
     }
 
     @Test(description = "Update player with non-existent editor")
@@ -480,7 +509,7 @@ public class PlayerControllerTest {
         SoftAssert softAssert = new SoftAssert();
         Player player = TestDataGenerator.generateValidPlayer();
         ResponseWrapper<PlayerResponse> actualPlayer = apiClient
-                .createPlayer(getProperty("default.supervisor.login"), player);
+                .createPlayer(getProperty(DEFAULT_SUPERVISOR_LOGIN), player);
         actualPlayer.expectingStatusCode(200);
         Integer playerId = actualPlayer.readEntity().getPlayerId();
         assertNotNull(playerId, "PlayerId should be not null");
@@ -501,153 +530,107 @@ public class PlayerControllerTest {
     public void testDeletePlayerWithSupervisor() {
         Player player = TestDataGenerator.generateValidPlayer();
         ResponseWrapper<PlayerResponse> actualPlayer = apiClient
-                .createPlayer(getProperty("default.supervisor.login"), player);
+                .createPlayer(getProperty(DEFAULT_SUPERVISOR_LOGIN), player);
         actualPlayer.expectingStatusCode(200);
         Integer playerId = actualPlayer.readEntity().getPlayerId();
         assertNotNull(playerId, "PlayerId should be not null");
-//        createdPlayerIds.add(playerId);
-//        ResponseWrapper<PlayerResponse> getPlayerResponse = apiClient.getPlayer(playerId);
-//        getPlayerResponse.expectingStatusCode(200);
 
-
-        // Delete the player
-        Response response = apiClient.deletePlayer(getProperty("default.supervisor.login"), playerId);
-
+        Response response = apiClient.deletePlayer(getProperty(DEFAULT_SUPERVISOR_LOGIN), playerId);
         assertEquals(response.getStatusCode(), 204, "Expected status code 204");
 
-        //todo потім гетнути!
+        ResponseWrapper<PlayerResponse> getPlayerResponse = apiClient.getPlayer(playerId);
+        getPlayerResponse.expectingStatusCode(200);
+
+        try {
+            String title = getPlayerResponse.getResponse().as(NoSuchUserBody.class).getTitle();
+            assertEquals(title, "User does not exist.", "Expected error message");
+        } catch (RuntimeException e) {
+            logger.error("Could not parse NoSuchUserBody from response", response.asString());
+            fail("Response body was not JSON or empty", e);
+        }
+
     }
-//
-//    @Test(description = "Delete player with admin")
-//    public void testDeletePlayerWithAdmin() {
-//        // First create a player
-//        Player player = TestDataGenerator.generateValidPlayer();
-//        Response createResponse = apiClient.createPlayer(config.getSupervisorLogin(), player);
-//        Assert.assertEquals(createResponse.getStatusCode(), 200, "Player creation should succeed");
-//
-//        // Extract player ID from response
-//        String responseBody = createResponse.getBody().asString();
-//        int playerId = Integer.parseInt(responseBody.replaceAll("[^0-9]", ""));
-//
-//        // Delete the player
-//        Response response = apiClient.deletePlayer(config.getAdminLogin(), playerId);
-//
-//        Assert.assertEquals(response.getStatusCode(), 200, "Expected status code 200");
-//    }
-//
 
-//    @Test(description = "Delete non-existent player")
-//    public void testDeleteNonExistentPlayer() {
-//        Response response = apiClient.deletePlayer(config.getSupervisorLogin(), 999999);
-//
-//        Assert.assertNotEquals(response.getStatusCode(), 200, "Expected error for non-existent player");
-//    }
-//
-//    @Test(description = "Delete player with non-existent editor")
-//    public void testDeletePlayerWithNonExistentEditor() {
-//        // First create a player
-//        Player player = TestDataGenerator.generateValidPlayer();
-//        Response createResponse = apiClient.createPlayer(config.getSupervisorLogin(), player);
-//        Assert.assertEquals(createResponse.getStatusCode(), 200, "Player creation should succeed");
-//
-//        // Extract player ID from response
-//        String responseBody = createResponse.getBody().asString();
-//        int playerId = Integer.parseInt(responseBody.replaceAll("[^0-9]", ""));
-//        threadLocalPlayerIds.get().add(playerId);
-//
-//        // Try to delete with non-existent editor
-//        Response response = apiClient.deletePlayer("nonexistent_editor", playerId);
-//
-//        Assert.assertNotEquals(response.getStatusCode(), 200, "Expected error for non-existent editor");
-//    }
-//
-//    // ==================== CRITICAL BUG TESTS ====================
-//
-//    @Test(description = "Test duplicate login constraint")
+    @Test(description = "Delete player with admin")
+    public void testDeletePlayerWithAdmin() {
+        Player player = TestDataGenerator.generateValidPlayer();
+        ResponseWrapper<PlayerResponse> actualPlayer = apiClient
+                .createPlayer(getProperty(DEFAULT_ADMIN_LOGIN), player);
+        actualPlayer.expectingStatusCode(200);
+        Integer playerId = actualPlayer.readEntity().getPlayerId();
+        assertNotNull(playerId, "PlayerId should be not null");
 
-//    public void testDuplicateLoginConstraint() {
-//        // Create first player
-//        Player player1 = TestDataGenerator.generateValidPlayer();
-//        Response createResponse1 = apiClient.createPlayer(config.getSupervisorLogin(), player1);
-//        Assert.assertEquals(createResponse1.getStatusCode(), 200, "First player creation should succeed");
-//
-//        // Extract player ID from response
-//        String responseBody1 = createResponse1.getBody().asString();
-//        int playerId1 = Integer.parseInt(responseBody1.replaceAll("[^0-9]", ""));
-//        threadLocalPlayerIds.get().add(playerId1);
-//
-//        // Try to create second player with same login
-//        Player player2 = TestDataGenerator.generatePlayerWithDuplicateLogin(player1.getLogin());
-//        Response createResponse2 = apiClient.createPlayer(config.getSupervisorLogin(), player2);
-//
-//        Assert.assertNotEquals(createResponse2.getStatusCode(), 200, "Expected error for duplicate login");
-//    }
-//
-//    @Test(description = "Test duplicate screen name constraint")
-//    @Story("Critical Bug Coverage")
-//    @Severity(SeverityLevel.CRITICAL)
-//    public void testDuplicateScreenNameConstraint() {
-//        // Create first player
-//        Player player1 = TestDataGenerator.generateValidPlayer();
-//        Response createResponse1 = apiClient.createPlayer(config.getSupervisorLogin(), player1);
-//        Assert.assertEquals(createResponse1.getStatusCode(), 200, "First player creation should succeed");
-//
-//        // Extract player ID from response
-//        String responseBody1 = createResponse1.getBody().asString();
-//        int playerId1 = Integer.parseInt(responseBody1.replaceAll("[^0-9]", ""));
-//        threadLocalPlayerIds.get().add(playerId1);
-//
-//        // Try to create second player with same screen name
-//        Player player2 = TestDataGenerator.generatePlayerWithDuplicateScreenName(player1.getScreenName());
-//        Response createResponse2 = apiClient.createPlayer(config.getSupervisorLogin(), player2);
-//
-//        Assert.assertNotEquals(createResponse2.getStatusCode(), 200, "Expected error for duplicate screen name");
-//    }
-//
-//    @Test(description = "Test supervisor cannot be deleted")
-//    @Story("Critical Bug Coverage")
-//    @Severity(SeverityLevel.CRITICAL)
-//    public void testSupervisorCannotBeDeleted() {
-//        // Try to delete supervisor (assuming supervisor has ID 1 or we can get it from get all)
-//        Response response = apiClient.deletePlayer(config.getSupervisorLogin(), 1);
-//
-//        Assert.assertNotEquals(response.getStatusCode(), 200, "Expected error when trying to delete supervisor");
-//    }
-//
-//    @Test(description = "Test user cannot create other users")
-//    @Story("Critical Bug Coverage")
-//    @Severity(SeverityLevel.CRITICAL)
-//    public void testUserCannotCreateOtherUsers() {
-//        // First create a regular user
-//        Player userPlayer = TestDataGenerator.generateValidPlayer("user");
-//        Response createUserResponse = apiClient.createPlayer(config.getSupervisorLogin(), userPlayer);
-//        Assert.assertEquals(createUserResponse.getStatusCode(), 200, "User creation should succeed");
-//
-//        // Extract user ID from response
-//        String responseBody = createUserResponse.getBody().asString();
-//        int userId = Integer.parseInt(responseBody.replaceAll("[^0-9]", ""));
-//        threadLocalPlayerIds.get().add(userId);
-//
-//        // Try to create another user using the regular user as editor
-//        Player newPlayer = TestDataGenerator.generateValidPlayer();
-//        Response createResponse = apiClient.createPlayer(userPlayer.getLogin(), newPlayer);
-//
-//        Assert.assertNotEquals(createResponse.getStatusCode(), 200, "Expected error when user tries to create another user");
-//    }
-//
-//    @Test(description = "Test SQL injection prevention")
-//    @Story("Critical Bug Coverage")
-//    @Severity(SeverityLevel.CRITICAL)
-//    public void testSqlInjectionPrevention() {
-//        // Test SQL injection in login field
-//        Player player = TestDataGenerator.generateValidPlayer();
-//        player.setLogin("'; DROP TABLE players; --");
-//
-//        Response response = apiClient.createPlayer(config.getSupervisorLogin(), player);
-//
-//        // Should not succeed with SQL injection attempt
-//        Assert.assertNotEquals(response.getStatusCode(), 200, "Expected error for SQL injection attempt");
-//    }
+        Response response = apiClient.deletePlayer(getProperty(DEFAULT_SUPERVISOR_LOGIN), playerId);
+        assertEquals(response.getStatusCode(), 204, "Expected status code 204");
+
+        ResponseWrapper<PlayerResponse> getPlayerResponse = apiClient.getPlayer(playerId);
+        getPlayerResponse.expectingStatusCode(200);
+
+        String responseMessage = getPlayerResponse.getResponse().as(NoSuchUserBody.class).getTitle();
+        assertEquals(responseMessage, "User does not exist.");
+    }
 
 
+    @Test(description = "Delete non-existent player")
+    public void testDeleteNonExistentPlayer() {
+        Response response = apiClient.deletePlayer(getProperty(DEFAULT_SUPERVISOR_LOGIN), 999999);
+        assertEquals(response.getStatusCode(), 403);
+    }
+
+    @Test(description = "Delete player with non-existent editor")
+    public void testDeletePlayerWithNonExistentEditor() {
+        Player player = TestDataGenerator.generateValidPlayer();
+        ResponseWrapper<PlayerResponse> actualPlayer = apiClient
+                .createPlayer(getProperty(DEFAULT_SUPERVISOR_LOGIN), player);
+        actualPlayer.expectingStatusCode(200);
+        Integer playerId = actualPlayer.readEntity().getPlayerId();
+        assertNotNull(playerId, "PlayerId should be not null");
+        Response response = apiClient.deletePlayer("nonexistent_editor", playerId);
+        createdPlayerIds.add(playerId);
+        assertEquals(response.getStatusCode(), 403);
+    }
+
+
+    @Test(description = "Test duplicate login constraint")
+    public void testDuplicateLoginConstraint() {
+        Player playerOne = TestDataGenerator.generateValidPlayer();
+        ResponseWrapper<PlayerResponse> firstPlayer = apiClient
+                .createPlayer(getProperty(DEFAULT_SUPERVISOR_LOGIN), playerOne);
+        firstPlayer.expectingStatusCode(200);
+        Integer playerOneId = firstPlayer.readEntity().getPlayerId();
+        assertNotNull(playerOneId, "PlayerId should be not null");
+        createdPlayerIds.add(playerOneId);
+
+        Player player2 = TestDataGenerator.generatePlayerWithDuplicateLogin(playerOne.getLogin());
+        ResponseWrapper<PlayerResponse> playerTwo = apiClient.createPlayer(getProperty(DEFAULT_SUPERVISOR_LOGIN), player2);
+        if (playerTwo.getResponse().getStatusCode() == 200) {
+            createdPlayerIds.add(playerTwo.readEntity().getPlayerId());
+        }
+        playerTwo.expectingStatusCode(403);
+    }
+
+    @Test(description = "Test supervisor cannot be deleted")
+    public void testSupervisorCannotBeDeleted() {
+        // Try to delete supervisor (assuming supervisor has ID 1 or we can get it from get all)
+        Response response = apiClient.deletePlayer(getProperty(DEFAULT_SUPERVISOR_LOGIN), 1);
+        assertEquals(response.getStatusCode(), 403);
+    }
+
+    @Test(description = "Test user cannot create other users")
+    public void testUserCannotCreateOtherUsers() {
+        Player userPlayer = TestDataGenerator.generateValidPlayer();
+
+        ResponseWrapper<PlayerResponse> createUserResponse = apiClient
+                .createPlayer(getProperty(DEFAULT_SUPERVISOR_LOGIN), userPlayer);
+        createUserResponse.expectingStatusCode(200);
+        Integer playerId = createUserResponse.readEntity().getPlayerId();
+        assertNotNull(playerId, "PlayerId should be not null");
+        createdPlayerIds.add(playerId);
+        ResponseWrapper<PlayerResponse> getPlayerResponse = apiClient.getPlayer(playerId);
+        getPlayerResponse.expectingStatusCode(200);
+
+        Player newPlayer = TestDataGenerator.generateValidPlayer();
+        ResponseWrapper<PlayerResponse> player = apiClient.createPlayer(userPlayer.getLogin(), newPlayer);
+        player.expectingStatusCode(403);
+    }
 }

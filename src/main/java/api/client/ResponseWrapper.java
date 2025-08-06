@@ -23,15 +23,11 @@ public class ResponseWrapper<T> {
     }
 
     public T readEntity() {
+        String body = response.getBody().asString();
+        if (body == null || body.isEmpty()) {
+            throw new IllegalStateException("Response body is empty; cannot map to " + responseClass.getSimpleName());
+        }
         return response.getBody().as(responseClass);
-    }
-
-    public T readEntityWithData() {
-        return response.getBody().jsonPath().getObject("data", responseClass);
-    }
-
-    public List<T> readEntities() {
-        return response.getBody().jsonPath().getList("data", responseClass);
     }
 
     public ResponseWrapper<T> expectingStatusCode(int statusCode) {
@@ -44,27 +40,8 @@ public class ResponseWrapper<T> {
         return this;
     }
 
-    public List<T> readIncludedEntities() {
-        return response.getBody().jsonPath().getList("included", responseClass);
-    }
-
     public List<T> readListEntity() {
         return response.getBody().jsonPath().getList("", responseClass);
     }
 
-
-    public List readIncluded(Class readClass) {
-        return response.getBody().jsonPath().getList("included", readClass);
-    }
-
-//    public List<ErrorBody> readErrorList() {
-//        return response.getBody().jsonPath().getList("errors", ErrorBody.class);
-//    }
-//
-//    public ErrorBody readError() {
-//        var errorList = readErrorList();
-//        assertNotNull(errorList);
-//        assertEquals(errorList.size(), 1);
-//        return errorList.get(0);
-//    }
 }

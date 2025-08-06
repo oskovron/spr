@@ -12,12 +12,13 @@ import io.restassured.response.Response;
 import java.util.HashMap;
 import java.util.Map;
 
+import static common.Properties.BASE_URL;
 import static java.lang.String.format;
 
 public class PlayerApiClient extends RestClient {
     @Override
     protected Configuration defaultConfiguration() {
-        return new Configuration(PropertiesReader.getProperty("base.url"), "application/json");
+        return new Configuration(PropertiesReader.getProperty(BASE_URL), "application/json");
     }
 
     public ResponseWrapper<PlayerResponse> createPlayer(String editor, Player player) {

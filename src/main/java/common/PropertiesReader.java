@@ -31,7 +31,7 @@ public class PropertiesReader {
             }
         }
         final String systemProperty = System.getProperty(propertyName);
-        var condition = configs.getProperty(propertyName, "Property Reader Fails");
+        var condition = configs.getProperty(propertyName, "Properties Reader Fails");
         return systemProperty == null ? condition : systemProperty;
     }
 

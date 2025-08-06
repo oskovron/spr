@@ -3,7 +3,7 @@
 <suite name="Player Controller Test Suite" parallel="methods" thread-count="3">
     <test name="Player Controller Tests">
         <classes>
-            <class name="com.spribe.test.tests.PlayerControllerTest"/>
+            <class name="api.PlayerControllerTest"/>
         </classes>
     </test>
 </suite>

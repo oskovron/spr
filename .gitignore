@@ -7,6 +7,15 @@ allure-report/
 test-output/
 reports/
 
+.idea/
+*.iws
+*.iml
+*.ipr
+.vscode/
+.settings/
+.project
+.classpath
+
 *.tmp
 *.temp
 *.swp

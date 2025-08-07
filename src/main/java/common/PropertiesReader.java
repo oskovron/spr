@@ -1,16 +1,13 @@
 package common;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
 public class PropertiesReader {
-//    private static final Logger logger = LoggerFactory.getLogger(PropertiesReader.class);
 
-    private PropertiesReader() {}
+    private PropertiesReader() {
+    }
 
     private static final String EXCEPTION_TEXT = "Error occurred during reading properties file: ";
 
@@ -35,7 +32,7 @@ public class PropertiesReader {
         return systemProperty == null ? condition : systemProperty;
     }
 
-    public static void setConfigProperty(String name, String value ) {
-        configs.setProperty(name,value);
+    public static void setConfigProperty(String name, String value) {
+        configs.setProperty(name, value);
     }
 }

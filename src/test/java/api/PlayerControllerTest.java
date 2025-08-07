@@ -28,7 +28,6 @@ import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInC
 import static org.testng.Assert.*;
 
 public class PlayerControllerTest {
-
     static {
         RestAssured.defaultParser = Parser.JSON;
     }
@@ -37,7 +36,6 @@ public class PlayerControllerTest {
     private PlayerApiClient apiClient;
     private List<Integer> createdPlayerIds;
 
-    //todo allure!
     @BeforeMethod
     public void setUp() {
         logger.info("Setting up PlayerControllerTest");
@@ -396,7 +394,7 @@ public class PlayerControllerTest {
     }
 
     @Test(description = "Update player gender")
-    public void testUpdatePlayerGender() { //todo rerun
+    public void testUpdatePlayerGender() {
         SoftAssert softAssert = new SoftAssert();
         Player player = TestDataGenerator.generateValidPlayer();
         PlayerResponse actualPlayer = createAndVerifyPlayer(player, getProperty(DEFAULT_SUPERVISOR_LOGIN));
@@ -501,7 +499,7 @@ public class PlayerControllerTest {
     }
 
     @Test(description = "Delete player with admin")
-    public void testDeletePlayerWithAdmin() { //todo rerun
+    public void testDeletePlayerWithAdmin() {
         Player player = TestDataGenerator.generateValidPlayer();
         PlayerResponse actualPlayer = createAndVerifyPlayer(player, getProperty(DEFAULT_SUPERVISOR_LOGIN));
 

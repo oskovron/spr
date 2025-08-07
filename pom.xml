@@ -17,6 +17,7 @@
         <json.schema.validator.version>5.4.0</json.schema.validator.version>
         <allure.version>2.23.1</allure.version>
         <allure.testng.version>2.29.1</allure.testng.version>
+        <allure.rest.assured.version>2.27.0</allure.rest.assured.version>
         <jackson.version>2.15.2</jackson.version>
         <logback.version>1.4.8</logback.version>
         <slf4j.version>2.0.7</slf4j.version>
@@ -24,14 +25,12 @@
     </properties>
 
     <dependencies>
-        <!-- TestNG -->
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
             <version>${testng.version}</version>
         </dependency>
 
-        <!-- RestAssured -->
         <dependency>
             <groupId>io.rest-assured</groupId>
             <artifactId>rest-assured</artifactId>
@@ -45,14 +44,12 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- Jackson for JSON processing -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>${jackson.version}</version>
         </dependency>
 
-        <!-- Logging -->
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
@@ -65,12 +62,17 @@
             <version>${slf4j.version}</version>
         </dependency>
 
-        <!-- Allure TestNG Integration -->
         <dependency>
             <groupId>io.qameta.allure</groupId>
             <artifactId>allure-testng</artifactId>
             <version>${allure.testng.version}</version>
             <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>io.qameta.allure</groupId>
+            <artifactId>allure-rest-assured</artifactId>
+            <version>${allure.rest.assured.version}</version>
         </dependency>
     </dependencies>
 
@@ -125,6 +127,5 @@
             </plugin>
         </plugins>
     </build>
-
 
 </project>

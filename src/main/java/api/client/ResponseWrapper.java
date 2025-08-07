@@ -33,4 +33,18 @@ public class ResponseWrapper<T> {
         return this;
     }
 
+    public <E> E readError(Class<E> errorClass) {
+        String body = response.getBody().asString();
+        if (body == null || body.isEmpty()) {
+            throw new IllegalStateException("Response body is empty; cannot map to " + errorClass.getSimpleName());
+        }
+
+        try {
+            return response.getBody().as(errorClass);
+        } catch (Exception e) {
+            throw new IllegalStateException("Failed to parse error body to " + errorClass.getSimpleName()
+                    + ". Raw response: " + body, e);
+        }
+    }
+
 }

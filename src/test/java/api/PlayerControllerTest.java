@@ -25,7 +25,8 @@ import static common.Properties.DEFAULT_ADMIN_LOGIN;
 import static common.Properties.DEFAULT_SUPERVISOR_LOGIN;
 import static common.PropertiesReader.getProperty;
 import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspath;
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 public class PlayerControllerTest {
     static {
@@ -112,37 +113,21 @@ public class PlayerControllerTest {
     @Test(description = "Create player with invalid age (too young)")
     public void testCreatePlayerWithInvalidAgeYoung() {
         Player player = TestDataGenerator.generatePlayerWithInvalidAgeYoung();
-        Response response = apiClient
-                .createPlayer(getProperty(DEFAULT_SUPERVISOR_LOGIN), player)
-                .getResponse();
-        assertEquals(response.getStatusCode(), 400, "Expected error for invalid age");
-
-        try {
-            String title = response.as(ErrorBody.class).getTitle();
-            assertEquals(title, "Player age is too young/old.",
-                    "Expected error message");
-        } catch (RuntimeException e) {
-            logger.error("Could not parse ErrorBody from response", response.asString());
-            fail("Response body was not JSON or empty", e);
-        }
+        ResponseWrapper<?> response = apiClient
+                .createPlayer(getProperty(DEFAULT_SUPERVISOR_LOGIN), player);
+        response.expectingStatusCode(400);
+        ErrorBody error = response.readError(ErrorBody.class);
+        assertEquals(error.getTitle(), "Player age is too young/old.", "Expected error message");
     }
 
     @Test(description = "Create player with invalid age (too old)")
     public void testCreatePlayerWithInvalidAgeOld() {
         Player player = TestDataGenerator.generatePlayerWithInvalidAgeOld();
-        Response response = apiClient
-                .createPlayer(getProperty(DEFAULT_SUPERVISOR_LOGIN), player)
-                .getResponse();
-        assertEquals(response.getStatusCode(), 400, "Expected error for invalid age");
-
-        try {
-            String title = response.as(ErrorBody.class).getTitle();
-            assertEquals(title, "Player age is too young/old.",
-                    "Expected error message");
-        } catch (RuntimeException e) {
-            logger.error("Could not parse ErrorBody from response", response.asString());
-            fail("Response body was not JSON or empty", e);
-        }
+        ResponseWrapper<?> response = apiClient
+                .createPlayer(getProperty(DEFAULT_SUPERVISOR_LOGIN), player);
+        response.expectingStatusCode(400);
+        ErrorBody error = response.readError(ErrorBody.class);
+        assertEquals(error.getTitle(), "Player age is too young/old.", "Expected error message");
     }
 
     /**
@@ -151,19 +136,11 @@ public class PlayerControllerTest {
     @Test(description = "Create player with invalid gender")
     public void testCreatePlayerWithInvalidGender() {
         Player player = TestDataGenerator.generatePlayerWithInvalidGender();
-        Response response = apiClient
-                .createPlayer(getProperty(DEFAULT_SUPERVISOR_LOGIN), player)
-                .getResponse();
-        assertEquals(response.getStatusCode(), 400, "Expected error for invalid gender");
-
-        try {
-            String title = response.as(ErrorBody.class).getTitle();
-            assertEquals(title, "Gender can be male/female.",
-                    "Expected error message");
-        } catch (RuntimeException e) {
-            logger.error("Could not parse ErrorBody from response", response.asString());
-            fail("Response body was not JSON or empty", e);
-        }
+        ResponseWrapper<?> response = apiClient
+                .createPlayer(getProperty(DEFAULT_SUPERVISOR_LOGIN), player);
+        response.expectingStatusCode(400);
+        ErrorBody error = response.readError(ErrorBody.class);
+        assertEquals(error.getTitle(), "Gender can be male/female.", "Expected error message");
     }
 
     /**
@@ -173,145 +150,98 @@ public class PlayerControllerTest {
     @Test(description = "Create player with invalid password (too short)")
     public void testCreatePlayerWithInvalidPasswordShort() {
         Player player = TestDataGenerator.generatePlayerWithInvalidPasswordShort();
-        Response response = apiClient
-                .createPlayer(getProperty(DEFAULT_SUPERVISOR_LOGIN), player)
-                .getResponse();
-        assertEquals(response.getStatusCode(), 400, "Expected error for invalid password");
-
-        try {
-            String title = response.as(ErrorBody.class).getTitle();
-            assertEquals(title, "Password must contain latin letters and numbers (min 7 max 15 characters).",
-                    "Expected error message");
-        } catch (RuntimeException e) {
-            logger.error("Could not parse ErrorBody from response", response.asString());
-            fail("Response body was not JSON or empty", e);
-        }
+        ResponseWrapper<?> response = apiClient
+                .createPlayer(getProperty(DEFAULT_SUPERVISOR_LOGIN), player);
+        response.expectingStatusCode(400);
+        ErrorBody error = response.readError(ErrorBody.class);
+        assertEquals(error.getTitle(),
+                "Password must contain latin letters and numbers (min 7 max 15 characters).",
+                "Expected error message");
     }
 
     @Test(description = "Create player with invalid password (too long)")
     public void testCreatePlayerWithInvalidPasswordLong() {
         Player player = TestDataGenerator.generatePlayerWithInvalidPasswordLong();
-        Response response = apiClient
-                .createPlayer(getProperty(DEFAULT_SUPERVISOR_LOGIN), player)
-                .getResponse();
-        assertEquals(response.getStatusCode(), 400, "Expected error for invalid password");
-
-        try {
-            String title = response.as(ErrorBody.class).getTitle();
-            assertEquals(title, "Password must contain latin letters and numbers (min 7 max 15 characters).",
-                    "Expected error message");
-        } catch (RuntimeException e) {
-            logger.error("Could not parse ErrorBody from response", response.asString());
-            fail("Response body was not JSON or empty", e);
-        }
+        ResponseWrapper<?> response = apiClient
+                .createPlayer(getProperty(DEFAULT_SUPERVISOR_LOGIN), player);
+        response.expectingStatusCode(400);
+        ErrorBody error = response.readError(ErrorBody.class);
+        assertEquals(error.getTitle(),
+                "Password must contain latin letters and numbers (min 7 max 15 characters).",
+                "Expected error message");
     }
 
     @Test(description = "Create player with invalid password (no numbers)")
     public void testCreatePlayerWithInvalidPasswordNoNumbers() {
         Player player = TestDataGenerator.generatePlayerWithInvalidPasswordNoNumbers();
-        Response response = apiClient
-                .createPlayer(getProperty(DEFAULT_SUPERVISOR_LOGIN), player)
-                .getResponse();
-        assertEquals(response.getStatusCode(), 400, "Expected error for invalid password");
-
-        try {
-            String title = response.as(ErrorBody.class).getTitle();
-            assertEquals(title, "Password must contain latin letters and numbers (min 7 max 15 characters).",
-                    "Expected error message");
-        } catch (RuntimeException e) {
-            logger.error("Could not parse ErrorBody from response", response.asString());
-            fail("Response body was not JSON or empty", e);
-        }
+        ResponseWrapper<?> response = apiClient
+                .createPlayer(getProperty(DEFAULT_SUPERVISOR_LOGIN), player);
+        response.expectingStatusCode(400);
+        ErrorBody error = response.readError(ErrorBody.class);
+        assertEquals(error.getTitle(),
+                "Password must contain latin letters and numbers (min 7 max 15 characters).",
+                "Expected error message");
     }
 
     @Test(description = "Create player with invalid password (no letters)")
     public void testCreatePlayerWithInvalidPasswordNoLetters() {
         Player player = TestDataGenerator.generatePlayerWithInvalidPasswordNoLetters();
-        Response response = apiClient
-                .createPlayer(getProperty(DEFAULT_SUPERVISOR_LOGIN), player)
-                .getResponse();
-        assertEquals(response.getStatusCode(), 400, "Expected error for invalid password");
-
-        try {
-            String title = response.as(ErrorBody.class).getTitle();
-            assertEquals(title, "Password must contain latin letters and numbers (min 7 max 15 characters).",
-                    "Expected error message");
-        } catch (RuntimeException e) {
-            logger.error("Could not parse ErrorBody from response", response.asString());
-            fail("Response body was not JSON or empty", e);
-        }
+        ResponseWrapper<?> response = apiClient
+                .createPlayer(getProperty(DEFAULT_SUPERVISOR_LOGIN), player);
+        response.expectingStatusCode(400);
+        ErrorBody error = response.readError(ErrorBody.class);
+        assertEquals(error.getTitle(),
+                "Password must contain latin letters and numbers (min 7 max 15 characters).",
+                "Expected error message");
     }
 
     @Test(description = "Create player with invalid role")
     public void testCreatePlayerWithInvalidRole() {
         Player player = TestDataGenerator.generatePlayerWithInvalidRole();
-        Response response = apiClient
-                .createPlayer(getProperty(DEFAULT_SUPERVISOR_LOGIN), player)
-                .getResponse();
-        assertEquals(response.getStatusCode(), 400, "Expected error for invalid role");
-
-        try {
-            String title = response.as(ErrorBody.class).getTitle();
-            assertEquals(title, "User can be created only with one role from the list: ‘admin’ or ‘user’.",
-                    "Expected error message");
-        } catch (RuntimeException e) {
-            logger.error("Could not parse ErrorBody from response", response.asString());
-            fail("Response body was not JSON or empty", e);
-        }
+        ResponseWrapper<?> response = apiClient
+                .createPlayer(getProperty(DEFAULT_SUPERVISOR_LOGIN), player);
+        response.expectingStatusCode(400);
+        ErrorBody error = response.readError(ErrorBody.class);
+        assertEquals(error.getTitle(),
+                "User can be created only with one role from the list: ‘admin’ or ‘user’.",
+                "Expected error message");
     }
 
     @Test(description = "Create player with null required fields")
     public void testCreatePlayerWithNullFields() {
         Player player = TestDataGenerator.generatePlayerWithNullFields();
-        Response response = apiClient
-                .createPlayer(getProperty(DEFAULT_SUPERVISOR_LOGIN), player)
-                .getResponse();
-        assertEquals(response.getStatusCode(), 400, "Expected error for null required fields");
+        ResponseWrapper<?> response = apiClient
+                .createPlayer(getProperty(DEFAULT_SUPERVISOR_LOGIN), player);
 
-        try {
-            String title = response.as(ErrorBody.class).getTitle();
-            assertEquals(title, "Required fields missing.",
-                    "Expected error message");
-        } catch (RuntimeException e) {
-            logger.error("Could not parse ErrorBody from response", response.asString());
-            fail("Response body was not JSON or empty", e);
-        }
+        response.expectingStatusCode(400);
+        ErrorBody error = response.readError(ErrorBody.class);
+        assertEquals(error.getTitle(),
+                "Required fields missing.",
+                "Expected error message");
     }
 
     @Test(description = "Create player with non-existent editor")
     public void testCreatePlayerWithNonExistentEditor() {
         Player player = TestDataGenerator.generateValidPlayer();
-        Response response = apiClient
-                .createPlayer("nonexistent_user", player)
-                .getResponse();
-        assertEquals(response.getStatusCode(), 403, "Expected error for non-existent editor");
-
-        try {
-            String title = response.as(ErrorBody.class).getTitle();
-            assertEquals(title, "Non-existent editor.",
-                    "Expected error message");
-        } catch (RuntimeException e) {
-            logger.error("Could not parse ErrorBody from response", response.asString());
-            fail("Response body was not JSON or empty", e);
-        }
+        ResponseWrapper<?> response = apiClient
+                .createPlayer("nonexistent_user", player);
+        response.expectingStatusCode(403);
+        ErrorBody error = response.readError(ErrorBody.class);
+        assertEquals(error.getTitle(),
+                "Non-existent editor.",
+                "Expected error message");
     }
 
     @Test(description = "Create player with user editor")
     public void testCreatePlayerWithNonSuperAdminOrAdminEditor() {
         Player player = TestDataGenerator.generateValidPlayer();
-        Response response = apiClient
-                .createPlayer("user", player)
-                .getResponse();
-        assertEquals(response.getStatusCode(), 403, "Expected error for non SuperAdmin or admin editor");
-
-        try {
-            String title = response.as(ErrorBody.class).getTitle();
-            assertEquals(title, "Only those with role ‘supervisor’ or ‘admin’ can create users.",
-                    "Expected error message");
-        } catch (RuntimeException e) {
-            logger.error("Could not parse ErrorBody from response", response.asString());
-            fail("Response body was not JSON or empty", e);
-        }
+        ResponseWrapper<?> response = apiClient
+                .createPlayer("user", player);
+        response.expectingStatusCode(403);
+        ErrorBody error = response.readError(ErrorBody.class);
+        assertEquals(error.getTitle(),
+                "Only those with role ‘supervisor’ or ‘admin’ can create users.",
+                "Expected error message");
     }
 
     @Test(description = "Get player by valid ID using POST method")
@@ -340,16 +270,10 @@ public class PlayerControllerTest {
     public void testGetPlayerByNonExistentId() {
         ResponseWrapper<PlayerResponse> getPlayerResponse = apiClient.getPlayer(999999);
         getPlayerResponse.expectingStatusCode(200);
-
-        try {
-            String title = getPlayerResponse.getResponse().as(NoSuchUserBody.class)
-                    .getTitle();
-            assertEquals(title, "User does not exist.", "Expected error message");
-        } catch (RuntimeException e) {
-            logger.error("Could not parse NoSuchUserBody from response", getPlayerResponse.toString());
-            fail("Response body was not JSON or empty", e);
-        }
-
+        NoSuchUserBody error = getPlayerResponse.readError(NoSuchUserBody.class);
+        assertEquals(error.getTitle(),
+                "User does not exist.",
+                "Expected error message");
     }
 
     @Test(description = "Get player with null playerId")
@@ -433,42 +357,32 @@ public class PlayerControllerTest {
     public void testUpdatePlayerWithInvalidAge() {
         Player player = TestDataGenerator.generateValidPlayer();
         PlayerResponse actualPlayer = createAndVerifyPlayer(player, getProperty(DEFAULT_SUPERVISOR_LOGIN));
-
         ResponseWrapper<PlayerResponse> getPlayerResponse = apiClient.getPlayer(actualPlayer.getPlayerId());
         getPlayerResponse.expectingStatusCode(200);
         Player updateData = new Player();
         updateData.setAge(15);
-
         ResponseWrapper<PlayerResponse> updatedPlayerResponse = apiClient.updatePlayer(
-                getProperty(DEFAULT_SUPERVISOR_LOGIN), actualPlayer.getPlayerId(), updateData);
+                getProperty(DEFAULT_SUPERVISOR_LOGIN),
+                actualPlayer.getPlayerId(),
+                updateData
+        );
         updatedPlayerResponse.expectingStatusCode(403);
-
-        try {
-            String title = updatedPlayerResponse.getResponse().as(ErrorBody.class).getTitle();
-            assertEquals(title, "User should be older than 16 and younger than 60 years old.",
-                    "Expected error message");
-        } catch (RuntimeException e) {
-            logger.error("Could not parse ErrorBody from response", updatedPlayerResponse.toString());
-            fail("Response body was not JSON or empty", e);
-        }
+        ErrorBody error = updatedPlayerResponse.readError(ErrorBody.class);
+        assertEquals(error.getTitle(),
+                "User should be older than 16 and younger than 60 years old.",
+                "Expected error message");
     }
 
     @Test(description = "Update non-existent player")
     public void testUpdateNonExistentPlayer() {
         Player updateData = new Player();
         updateData.setAge(25);
-
         ResponseWrapper<PlayerResponse> updatePlayerResponse =
                 apiClient.updatePlayer(getProperty(DEFAULT_SUPERVISOR_LOGIN), 999999, updateData);
-
-        try {
-            String title = updatePlayerResponse.getResponse().as(NoSuchUserBody.class).getTitle();
-            assertEquals(title, "User does not exist.",
-                    "Expected error message");
-        } catch (RuntimeException e) {
-            logger.error("Could not parse NoSuchUserBody from response", updatePlayerResponse.toString());
-            fail("Response body was not JSON or empty", e);
-        }
+        NoSuchUserBody error = updatePlayerResponse.readError(NoSuchUserBody.class);
+        assertEquals(error.getTitle(),
+                "User does not exist.",
+                "Expected error message");
     }
 
     @Test(description = "Update player with non-existent editor")
@@ -514,7 +428,7 @@ public class PlayerControllerTest {
     @Test(description = "Delete non-existent player")
     public void testDeleteNonExistentPlayer() {
         Response response = apiClient.deletePlayer(getProperty(DEFAULT_SUPERVISOR_LOGIN), 999999);
-        assertEquals(response.getStatusCode(), 403);
+        assertEquals(response.getStatusCode(), 403, "Response code differs");
     }
 
     @Test(description = "Delete player with non-existent editor")
@@ -523,20 +437,13 @@ public class PlayerControllerTest {
         PlayerResponse actualPlayer = createAndVerifyPlayer(player, getProperty(DEFAULT_SUPERVISOR_LOGIN));
         Response response = apiClient.deletePlayer("nonexistent_editor", actualPlayer.getPlayerId());
         createdPlayerIds.add(actualPlayer.getPlayerId());
-        assertEquals(response.getStatusCode(), 403);
+        assertEquals(response.getStatusCode(), 403, "Response code differs");
     }
 
 
     @Test(description = "Test duplicate login constraint")
     public void testDuplicateLoginConstraint() {
         Player playerOne = TestDataGenerator.generateValidPlayer();
-//        ResponseWrapper<PlayerResponse> firstPlayer = apiClient
-//                .createPlayer(getProperty(DEFAULT_SUPERVISOR_LOGIN), playerOne);
-//        firstPlayer.expectingStatusCode(200);
-//        Integer playerOneId = firstPlayer.readEntity().getPlayerId();
-//        assertNotNull(playerOneId, "PlayerId should be not null");
-//        createdPlayerIds.add(playerOneId);
-
         PlayerResponse firstPlayer = createAndVerifyPlayer(playerOne, getProperty(DEFAULT_SUPERVISOR_LOGIN));
 
         Player player2 = TestDataGenerator.generatePlayerWithDuplicateLogin(playerOne.getLogin());
@@ -551,7 +458,7 @@ public class PlayerControllerTest {
     public void testSupervisorCannotBeDeleted() {
         // Try to delete supervisor (assuming supervisor has ID 1 or we can get it from get all)
         Response response = apiClient.deletePlayer(getProperty(DEFAULT_SUPERVISOR_LOGIN), 1);
-        assertEquals(response.getStatusCode(), 403);
+        assertEquals(response.getStatusCode(), 403, "Response code differs");
     }
 
     @Test(description = "Test user cannot create other users")
@@ -581,10 +488,10 @@ public class PlayerControllerTest {
     private void assertPlayerEquals(PlayerResponse actual, Player expected, SoftAssert sa) {
         sa.assertEquals(actual.getAge(), expected.getAge(), "Wrong age");
         sa.assertEquals(actual.getGender(), expected.getGender(), "Wrong gender");
-        sa.assertEquals(actual.getLogin(), expected.getLogin(), "Wrong gender");
-        sa.assertEquals(actual.getPassword(), expected.getPassword(), "Wrong gender");
-        sa.assertEquals(actual.getRole(), expected.getRole(), "Wrong gender");
-        sa.assertEquals(actual.getScreenName(), expected.getScreenName(), "Wrong gender");
+        sa.assertEquals(actual.getLogin(), expected.getLogin(), "Wrong login");
+        sa.assertEquals(actual.getPassword(), expected.getPassword(), "Wrong password");
+        sa.assertEquals(actual.getRole(), expected.getRole(), "Wrong role");
+        sa.assertEquals(actual.getScreenName(), expected.getScreenName(), "Wrong screen_name");
         sa.assertAll();
     }
 }

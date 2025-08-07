@@ -1,0 +1,14 @@
+*.class
+*.log
+
+allure-results/
+allure-report/
+
+test-output/
+reports/
+
+*.tmp
+*.temp
+*.swp
+*.swo
+*~

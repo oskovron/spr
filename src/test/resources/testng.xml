@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="Player Controller Test Suite" parallel="methods" thread-count="${thread.count}">
+    <parameter name="thread.count" value="${thread.count}"/>
+    
+    <test name="Player Controller Tests" parallel="methods" thread-count="${thread.count}">
+        <classes>
+            <class name="api.PlayerControllerTest"/>
+        </classes>
+    </test>
+</suite>
